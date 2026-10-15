@@ -236,33 +236,9 @@ func adminList(base string, t Target) (request, error) {
 	client := &http.Client{Jar: jar, Timeout: 30 * time.Second,
 		CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
 	a := t.Admin
-	loginURL := base + a.LoginPath
-	resp, err := retry429(func() (*http.Response, error) { return client.Get(loginURL) })
-	if err != nil {
-		return nil, fmt.Errorf("GET %s: %w", a.LoginPath, err)
+	if err := submitLogin(client, base, t); err != nil {
+		return nil, err
 	}
-	fields, action, err := conform.FormFields(resp.Body)
-	resp.Body.Close()
-	if err != nil {
-		return nil, fmt.Errorf("admin login page: %w", err)
-	}
-	fields.Set(a.UsernameField, t.Username)
-	fields.Set(a.PasswordField, t.Password)
-	time.Sleep(adminStepPause)
-	target := loginURL
-	if action != "" {
-		ref, err := url.Parse(action)
-		if err != nil {
-			return nil, fmt.Errorf("admin login form action %q: %w", action, err)
-		}
-		u, _ := url.Parse(loginURL)
-		target = u.ResolveReference(ref).String()
-	}
-	post, err := retry429(func() (*http.Response, error) { return client.PostForm(target, fields) })
-	if err != nil {
-		return nil, fmt.Errorf("POST admin login: %w", err)
-	}
-	post.Body.Close()
 	time.Sleep(adminStepPause)
 	listURL := base + a.ListPath
 	// Signed in for real? One list request must show a seeded pet before the
@@ -287,6 +263,40 @@ func adminList(base string, t Target) (request, error) {
 		}
 		return req, http.StatusOK, nil
 	}, nil
+}
+
+// submitLogin fetches the admin's login form and posts it with the staff
+// credentials, copying hidden inputs such as CSRF tokens as a browser would.
+func submitLogin(client *http.Client, base string, t Target) error {
+	a := t.Admin
+	loginURL := base + a.LoginPath
+	resp, err := retry429(func() (*http.Response, error) { return client.Get(loginURL) })
+	if err != nil {
+		return fmt.Errorf("GET %s: %w", a.LoginPath, err)
+	}
+	fields, action, err := conform.FormFields(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		return fmt.Errorf("admin login page: %w", err)
+	}
+	fields.Set(a.UsernameField, t.Username)
+	fields.Set(a.PasswordField, t.Password)
+	time.Sleep(adminStepPause)
+	target := loginURL
+	if action != "" {
+		ref, err := url.Parse(action)
+		if err != nil {
+			return fmt.Errorf("admin login form action %q: %w", action, err)
+		}
+		u, _ := url.Parse(loginURL)
+		target = u.ResolveReference(ref).String()
+	}
+	post, err := retry429(func() (*http.Response, error) { return client.PostForm(target, fields) })
+	if err != nil {
+		return fmt.Errorf("POST admin login: %w", err)
+	}
+	post.Body.Close()
+	return nil
 }
 
 // adminStepPause separates the steps of an admin sign-in.
