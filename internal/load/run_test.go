@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -81,5 +82,21 @@ func TestAnUnknownScenarioOrAnUnreachableAppIsAnError(t *testing.T) {
 	defer cancel()
 	if _, err := Run(ctx, testParams(), Target{BaseURL: "http://127.0.0.1:1", Username: "u", Password: "p"}, "pet"); err == nil {
 		t.Error("an unreachable app must fail, not report zero requests")
+	}
+}
+
+func TestAnAdminThatDoesNotSignInIsAnErrorNotAMeasurement(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/admin/login/" && r.Method == http.MethodGet {
+			w.Write([]byte(`<form method="post"><input name="username"><input name="password"></form>`))
+			return
+		}
+		w.Write([]byte("please sign in")) // the list page never shows a pet
+	}))
+	defer srv.Close()
+	tg := Target{BaseURL: srv.URL, Username: "u", Password: "p",
+		Admin: &conform.Admin{LoginPath: "/admin/login/", ListPath: "/admin/pet/", UsernameField: "username", PasswordField: "password"}}
+	if _, err := Run(context.Background(), testParams(), tg, "admin"); err == nil || !strings.Contains(err.Error(), "sign-in failed") {
+		t.Errorf("err = %v, want a sign-in failure", err)
 	}
 }

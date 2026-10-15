@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -44,6 +45,8 @@ type Result struct {
 	P50Ms         float64        `json:"p50_ms"`
 	P95Ms         float64        `json:"p95_ms"`
 	P99Ms         float64        `json:"p99_ms"`
+	// FirstError is the first transport failure (status 0), if any.
+	FirstError string `json:"first_error,omitempty"`
 }
 
 // request builds the next request of a scenario and says which status counts
@@ -81,6 +84,7 @@ func Run(ctx context.Context, p Params, t Target, scenario string) (Result, erro
 type sample struct {
 	latency time.Duration
 	status  int // 0 for a transport failure
+	err     string
 	ok      bool
 }
 
@@ -116,7 +120,7 @@ func drive(ctx context.Context, p Params, client *http.Client, next request, d t
 				resp, err := client.Do(req.WithContext(ctx))
 				if err != nil {
 					if ctx.Err() == nil {
-						out[w] = append(out[w], sample{status: 0})
+						out[w] = append(out[w], sample{status: 0, err: err.Error()})
 					}
 					continue
 				}
@@ -135,6 +139,9 @@ func summarize(res Result, samples []sample, elapsed time.Duration) Result {
 	var lat []time.Duration
 	for _, s := range samples {
 		res.Requests++
+		if s.err != "" && res.FirstError == "" {
+			res.FirstError = s.err
+		}
 		res.Statuses[strconv.Itoa(s.status)]++
 		if s.ok {
 			res.OK++
@@ -222,10 +229,15 @@ func login(client *http.Client, base string, t Target) (string, error) {
 // list page with the session cookie.
 func adminList(base string, t Target) (request, error) {
 	jar, _ := cookiejar.New(nil)
-	client := &http.Client{Jar: jar, Timeout: 30 * time.Second}
+	// Sign in the way a person does: one step at a time, not following the
+	// redirect after the login (it would spend another request), pausing
+	// between steps so a rate-limited admin (uAdmin allows 3 requests a
+	// second) lets each one through.
+	client := &http.Client{Jar: jar, Timeout: 30 * time.Second,
+		CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
 	a := t.Admin
 	loginURL := base + a.LoginPath
-	resp, err := client.Get(loginURL)
+	resp, err := retry429(func() (*http.Response, error) { return client.Get(loginURL) })
 	if err != nil {
 		return nil, fmt.Errorf("GET %s: %w", a.LoginPath, err)
 	}
@@ -236,6 +248,7 @@ func adminList(base string, t Target) (request, error) {
 	}
 	fields.Set(a.UsernameField, t.Username)
 	fields.Set(a.PasswordField, t.Password)
+	time.Sleep(adminStepPause)
 	target := loginURL
 	if action != "" {
 		ref, err := url.Parse(action)
@@ -245,12 +258,24 @@ func adminList(base string, t Target) (request, error) {
 		u, _ := url.Parse(loginURL)
 		target = u.ResolveReference(ref).String()
 	}
-	post, err := client.PostForm(target, fields)
+	post, err := retry429(func() (*http.Response, error) { return client.PostForm(target, fields) })
 	if err != nil {
 		return nil, fmt.Errorf("POST admin login: %w", err)
 	}
 	post.Body.Close()
+	time.Sleep(adminStepPause)
 	listURL := base + a.ListPath
+	// Signed in for real? One list request must show a seeded pet before the
+	// measurement starts, or every request after it would be measuring a login page.
+	check, err := retry429(func() (*http.Response, error) { return client.Get(listURL) })
+	if err != nil {
+		return nil, fmt.Errorf("GET %s: %w", a.ListPath, err)
+	}
+	body, _ := io.ReadAll(io.LimitReader(check.Body, 8<<20))
+	check.Body.Close()
+	if check.StatusCode != http.StatusOK || !seededPet.Match(body) {
+		return nil, fmt.Errorf("admin sign-in failed: GET %s answered %d with no seeded pet name", a.ListPath, check.StatusCode)
+	}
 	cookies := jar.Cookies(mustParse(listURL))
 	return func(*rand.Rand) (*http.Request, int, error) {
 		req, err := http.NewRequest("GET", listURL, nil)
@@ -262,6 +287,24 @@ func adminList(base string, t Target) (request, error) {
 		}
 		return req, http.StatusOK, nil
 	}, nil
+}
+
+// adminStepPause separates the steps of an admin sign-in.
+var adminStepPause = 2 * time.Second
+
+var seededPet = regexp.MustCompile(`Pet \d{5}`)
+
+// retry429 repeats a request while it answers 429, as a person would after
+// a pause: an admin that rate limits is still signed in to.
+func retry429(do func() (*http.Response, error)) (*http.Response, error) {
+	for attempt := 0; ; attempt++ {
+		resp, err := do()
+		if err != nil || resp.StatusCode != http.StatusTooManyRequests || attempt == 5 {
+			return resp, err
+		}
+		resp.Body.Close()
+		time.Sleep(2200 * time.Millisecond)
+	}
 }
 
 func mustParse(raw string) *url.URL {

@@ -42,6 +42,18 @@ wait_ready() {
 	done
 }
 
+# A server that closes every connection (gunicorn's sync workers) leaves
+# thousands of sockets in TIME_WAIT; the next run would then fail to connect
+# for lack of local ports and measure the client, not the app.
+wait_quiet() {
+	w=0
+	while [ "$(netstat -an -p tcp | grep -c TIME_WAIT)" -gt 1000 ]; do
+		w=$((w + 1))
+		[ "$w" -lt 180 ] || { echo "bench.sh: TIME_WAIT sockets did not drain in 6 minutes" >&2; exit 1; }
+		sleep 2
+	done
+}
+
 cmd="${1:-}"; app="${2:-}"
 case "$cmd" in
 	up)      need_app "$app"; compose "$app" up -d --build --wait db app; wait_ready ;;
@@ -56,6 +68,7 @@ case "$cmd" in
 	         for sc in $(echo "$scenarios" | tr ',' ' '); do
 	         	i=1
 	         	while [ "$i" -le "$runs" ]; do
+	         		wait_quiet
 	         		./bin/loadseed -dsn "$DSN" -map "apps/$app/seed-map.json" >/dev/null
 	         		./bin/load run -app "apps/$app" -scenario "$sc" -run "$i" -container "$container" -out "$out"
 	         		i=$((i + 1))
