@@ -158,3 +158,7 @@ func formFields(r io.Reader) (url.Values, string, error) {
 		}
 	}
 }
+
+// FormFields is formFields for other packages: the load runner signs in to an
+// admin the same way the suite does.
+func FormFields(r io.Reader) (url.Values, string, error) { return formFields(r) }

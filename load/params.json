@@ -1,0 +1,10 @@
+{
+  "warmup_seconds": 5,
+  "duration_seconds": 15,
+  "concurrency": 32,
+  "runs": 5,
+  "seed": {"categories": 20, "pets": 10000, "customers": 1000},
+  "list_page_size": 20,
+  "read_percent": 90,
+  "scenarios": ["list", "pet", "order", "admin", "mix"]
+}

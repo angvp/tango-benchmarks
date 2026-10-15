@@ -6,6 +6,7 @@
 #   ./bench.sh reset <app>      truncate and reload the seed (a fresh database)
 #   ./bench.sh conform <app>    run the conformance suite, write results/<app>.json
 #   ./bench.sh effort <app>     build the image, count steps/files/lines/tokens, write results/<app>-effort.json
+#   ./bench.sh load <app>       run every load scenario (load/params.json), write results/<app>-load/
 #   ./bench.sh down             stop everything
 #
 # <app> is a directory under apps/. Results go to results/, which git ignores.
@@ -15,7 +16,7 @@ cd "$(dirname "$0")"
 DSN="postgres://bench:bench@127.0.0.1:55440/bench?sslmode=disable"
 BASE_URL="http://127.0.0.1:8080"
 
-usage() { sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+usage() { sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
 
 compose() {
 	app="$1"; shift
@@ -25,6 +26,8 @@ compose() {
 need_app() {
 	[ -n "${1:-}" ] && [ -f "apps/$1/app.json" ] || { echo "bench.sh: apps/<app>/app.json not found (app: ${1:-none})" >&2; exit 2; }
 }
+
+build_load() { mkdir -p bin && go build -o bin/load ./cmd/load; }
 
 build_effort() { mkdir -p bin && go build -o bin/effort ./cmd/effort; }
 
@@ -45,6 +48,20 @@ case "$cmd" in
 	reset)   need_app "$app"; build_tools; ./bin/loadseed -dsn "$DSN" -map "apps/$app/seed-map.json" ;;
 	conform) need_app "$app"; build_tools; ./bin/conform -base-url "$BASE_URL" -app "apps/$app/app.json" -out "results/$app.json" ;;
 	effort)  need_app "$app"; build_effort; compose "$app" build app; ./bin/effort -app "apps/$app" -image tangobench-app -out "results/$app-effort.json" ;;
+	load)    need_app "$app"; build_load; build_tools; "$0" up "$app"
+	         container="$(compose "$app" ps -q app)"
+	         out="results/$app-load"; command rm -rf "$out" </dev/null
+	         scenarios="$(sed -n 's/.*"scenarios": *\[\(.*\)\].*/\1/p' load/params.json | tr -d '" ')"
+	         runs="$(sed -n 's/.*"runs": *\([0-9]*\).*/\1/p' load/params.json)"
+	         for sc in $(echo "$scenarios" | tr ',' ' '); do
+	         	i=1
+	         	while [ "$i" -le "$runs" ]; do
+	         		./bin/loadseed -dsn "$DSN" -map "apps/$app/seed-map.json" >/dev/null
+	         		./bin/load run -app "apps/$app" -scenario "$sc" -run "$i" -container "$container" -out "$out"
+	         		i=$((i + 1))
+	         	done
+	         done
+	         ./bin/load summarize -dir "$out" ;;
 	run)     "$0" up "$app"; "$0" reset "$app"; "$0" conform "$app" ;;
 	down)    for f in apps/*/compose.yaml; do docker compose -f compose.yaml -f "$f" down -v --remove-orphans >/dev/null 2>&1 || true; done ;;
 	*)       usage ;;
