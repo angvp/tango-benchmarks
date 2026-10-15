@@ -1,0 +1,4 @@
+# Results never go in this repository until they have been reviewed.
+/results/
+*.test
+/bin/
