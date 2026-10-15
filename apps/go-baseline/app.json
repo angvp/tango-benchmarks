@@ -1,0 +1,5 @@
+{
+  "name": "go-baseline",
+  "admin": null,
+  "admin_na_reason": "the baseline is a plain HTTP server with no administration interface, by design"
+}

@@ -1,0 +1,13 @@
+services:
+  app:
+    build: ./apps/go-baseline
+    environment:
+      DATABASE_URL: postgres://bench:bench@db:5432/bench?sslmode=disable
+      LISTEN_ADDR: ":8080"
+    ports:
+      - "127.0.0.1:8080:8080"
+    cpus: 2
+    mem_limit: 2g
+    depends_on:
+      db:
+        condition: service_healthy
