@@ -1,0 +1,7 @@
+# From an empty directory to a running pet shop with its staff account.
+go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.28.0
+go mod init petshop
+go get github.com/go-chi/chi/v5 github.com/jackc/pgx/v5 golang.org/x/crypto
+sqlc generate
+go build -o petshop .
+DATABASE_URL=postgres://bench:bench@localhost:5432/bench ./petshop

@@ -1,0 +1,4 @@
+{
+  "generated": ["manage.py", "petshop/__init__.py", "petshop/asgi.py", "petshop/wsgi.py", "shop/__init__.py", "shop/apps.py", "shop/migrations/*.py"],
+  "scaffold_edited": ["petshop/settings.py", "petshop/urls.py", "shop/models.py", "shop/admin.py", "shop/views.py"]
+}

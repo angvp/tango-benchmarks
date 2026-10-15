@@ -1,0 +1,7 @@
+# From an empty directory to a running pet shop with a staff member who can log in to the admin.
+go install github.com/angvp/tango/cmd/tango@v0.4.0
+tango newproject petshop
+tango makemigrations
+TANGO_DB_DSN=postgres://bench:bench@localhost:5432/bench tango migrate
+TANGO_DB_DSN=postgres://bench:bench@localhost:5432/bench TANGO_ADMIN_PASSWORD=bench-staff-password tango admin create bench-staff
+TANGO_DB_DSN=postgres://bench:bench@localhost:5432/bench go run .

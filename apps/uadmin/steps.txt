@@ -1,0 +1,7 @@
+# From an empty directory to a running pet shop with a staff member who can log in to the admin.
+go install github.com/uadmin/uadmin/cmd/uadmin@v0.10.2
+go mod init petshop
+go get github.com/uadmin/uadmin@v0.10.2
+uadmin prepare
+go build -o petshop .
+UADMIN_DB_TYPE=postgres UADMIN_DB_HOST=localhost UADMIN_DB_PORT=5432 UADMIN_DB_NAME=bench UADMIN_DB_USER=bench UADMIN_DB_PASSWORD=bench ./petshop

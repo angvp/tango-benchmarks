@@ -1,0 +1,8 @@
+# From an empty directory to a running pet shop with a staff member who can log in to the admin.
+pip install Django==6.1.2 gunicorn==26.2.0 "psycopg[binary]==3.3.6"
+django-admin startproject petshop .
+python manage.py startapp shop
+python manage.py makemigrations shop
+DATABASE_URL=postgres://bench:bench@localhost:5432/bench python manage.py migrate
+DATABASE_URL=postgres://bench:bench@localhost:5432/bench DJANGO_SUPERUSER_PASSWORD=bench-staff-password python manage.py createsuperuser --noinput --username bench-staff --email bench@example.test
+DATABASE_URL=postgres://bench:bench@localhost:5432/bench gunicorn petshop.wsgi:application

@@ -1,0 +1,4 @@
+{
+  "generated": ["migrations/*.go", "shell/**"],
+  "scaffold_edited": ["main.go", "project/project.go"]
+}
