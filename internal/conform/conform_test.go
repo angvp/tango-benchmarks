@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/angvp/tango-benchmarks/internal/fakeapp"
 )
@@ -118,5 +119,31 @@ func TestAnUnreachableAppFailsEveryCheckInsteadOfPanicking(t *testing.T) {
 	results := Run(context.Background(), Config{BaseURL: "http://127.0.0.1:1", Username: "u", Password: "p", AdminNAReason: "none"})
 	if !Failed(results) {
 		t.Fatal("an unreachable app must fail")
+	}
+}
+
+func TestAnAdminThatRateLimitsIsRetriedAndTheRetryIsReported(t *testing.T) {
+	defer shortRetryWait()()
+	results := run(t, fakeapp.AdminSlowDown)
+	r, _ := byID(results, "admin.list")
+	if r.Status != Pass {
+		t.Fatalf("admin.list = %s %s, want a pass after a retry", r.Status, r.Detail)
+	}
+	if !strings.Contains(r.Detail, "429") || !strings.Contains(r.Detail, "retried") {
+		t.Fatalf("the retry must be reported, got %q", r.Detail)
+	}
+}
+
+func shortRetryWait() func() {
+	old := retryWait
+	retryWait = time.Millisecond
+	return func() { retryWait = old }
+}
+
+func TestAnAdminThatNeverStopsRateLimitingFails(t *testing.T) {
+	defer shortRetryWait()()
+	results := run(t, fakeapp.AdminAlwaysSlowDown)
+	if r, _ := byID(results, "admin.list"); r.Status != Fail {
+		t.Fatalf("admin.list = %s, want fail when every attempt is rate limited", r.Status)
 	}
 }

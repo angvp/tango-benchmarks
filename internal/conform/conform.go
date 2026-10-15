@@ -94,9 +94,17 @@ func Run(ctx context.Context, cfg Config) []Result {
 	return results
 }
 
+// passWith is returned by a check that passed but has something to report.
+type passWith string
+
+func (p passWith) Error() string { return string(p) }
+
 func outcome(id string, err error) Result {
 	if err == nil {
 		return Result{ID: id, Status: Pass}
+	}
+	if note, ok := err.(passWith); ok {
+		return Result{ID: id, Status: Pass, Detail: string(note)}
 	}
 	if na, ok := err.(notApplicable); ok {
 		return Result{ID: id, Status: NotApplicable, Detail: string(na)}

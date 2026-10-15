@@ -52,7 +52,7 @@ An app that ships an administration interface describes it in `app.json`:
            "username_field": "username", "password_field": "password"}}
 ```
 
-or `{"admin": null, "admin_na_reason": "..."}`. The suite checks that the list page answers neither `200` with pet rows nor any pet data to an anonymous client, then signs in through the HTML form (hidden inputs such as CSRF tokens are copied as the browser would) and checks that `list_path` answers `200` HTML containing the name of pet 1 (`Pet 00001`).
+or `{"admin": null, "admin_na_reason": "..."}`. The suite checks that the list page shows no pet data to an anonymous client, then signs in through the HTML form (hidden inputs such as CSRF tokens are copied as the browser would) and checks that `list_path` answers `200` HTML showing the name of at least one seeded pet (`Pet 00001` to `Pet 10000`; an admin may list the newest first). An admin that rate limits (uAdmin allows 3 requests a second to its pages by default) is given a few retries after a `429`, and the result says it needed them.
 
 ## Configuration
 

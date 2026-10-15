@@ -1,0 +1,17 @@
+services:
+  app:
+    build: ./apps/uadmin
+    environment:
+      UADMIN_DB_TYPE: postgres
+      UADMIN_DB_HOST: db
+      UADMIN_DB_PORT: "5432"
+      UADMIN_DB_NAME: bench
+      UADMIN_DB_USER: bench
+      UADMIN_DB_PASSWORD: bench
+    ports:
+      - "127.0.0.1:8080:8080"
+    cpus: 2
+    mem_limit: 2g
+    depends_on:
+      db:
+        condition: service_healthy

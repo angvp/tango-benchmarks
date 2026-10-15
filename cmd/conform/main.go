@@ -48,6 +48,9 @@ func main() {
 		switch r.Status {
 		case conform.Pass:
 			pass++
+			if r.Detail != "" {
+				fmt.Printf("NOTE %s: %s\n", r.ID, r.Detail)
+			}
 		case conform.Fail:
 			fail++
 			fmt.Printf("FAIL %s: %s\n", r.ID, r.Detail)

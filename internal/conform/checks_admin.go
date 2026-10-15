@@ -5,12 +5,40 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
+	"time"
 
 	"golang.org/x/net/html"
 )
 
-const firstPetName = "Pet 00001"
+const (
+	// An admin may rate limit by design (uAdmin allows 3 requests a second by
+	// default). A person would not click that fast, so the suite waits and
+	// tries again, a few times, and says it did.
+	maxAdminRetries = 3
+)
+
+// seededPetName matches the name of any seeded pet. The admin may list the
+// newest rows first (uAdmin does), so no particular pet is expected.
+var seededPetName = regexp.MustCompile(`Pet \d{5}`)
+
+// retryWait is how long to wait after a 429. A variable so tests can shorten it.
+var retryWait = 1100 * time.Millisecond
+
+// withRetry runs do until it stops answering 429, at most maxAdminRetries more
+// times, and counts the retries.
+func withRetry(retries *int, do func() (*http.Response, error)) (*http.Response, error) {
+	for attempt := 0; ; attempt++ {
+		resp, err := do()
+		if err != nil || resp.StatusCode != http.StatusTooManyRequests || attempt == maxAdminRetries {
+			return resp, err
+		}
+		resp.Body.Close()
+		*retries++
+		time.Sleep(retryWait)
+	}
+}
 
 var adminChecks = []check{
 	{"admin.protected", func(e *env) error {
@@ -21,7 +49,7 @@ var adminChecks = []check{
 		if err != nil {
 			return err
 		}
-		if r.status == http.StatusOK && strings.Contains(string(r.body), firstPetName) {
+		if r.status == http.StatusOK && seededPetName.Match(r.body) {
 			return fmt.Errorf("anonymous GET %s shows pet data", e.cfg.Admin.ListPath)
 		}
 		return nil
@@ -33,7 +61,8 @@ var adminChecks = []check{
 		client := e.jar()
 		a := e.cfg.Admin
 		loginURL := strings.TrimRight(e.cfg.BaseURL, "/") + a.LoginPath
-		resp, err := client.Get(loginURL)
+		retries := 0
+		resp, err := withRetry(&retries, func() (*http.Response, error) { return client.Get(loginURL) })
 		if err != nil {
 			return fmt.Errorf("GET %s: %w", a.LoginPath, err)
 		}
@@ -53,12 +82,13 @@ var adminChecks = []check{
 			}
 			target = base.ResolveReference(ref).String()
 		}
-		post, err := client.PostForm(target, fields)
+		post, err := withRetry(&retries, func() (*http.Response, error) { return client.PostForm(target, fields) })
 		if err != nil {
 			return fmt.Errorf("POST login form: %w", err)
 		}
 		post.Body.Close()
-		list, err := client.Get(strings.TrimRight(e.cfg.BaseURL, "/") + a.ListPath)
+		listURL := strings.TrimRight(e.cfg.BaseURL, "/") + a.ListPath
+		list, err := withRetry(&retries, func() (*http.Response, error) { return client.Get(listURL) })
 		if err != nil {
 			return fmt.Errorf("GET %s: %w", a.ListPath, err)
 		}
@@ -70,8 +100,11 @@ var adminChecks = []check{
 		if !strings.Contains(list.Header.Get("Content-Type"), "text/html") {
 			return fmt.Errorf("%s is %q, want HTML", a.ListPath, list.Header.Get("Content-Type"))
 		}
-		if !strings.Contains(string(body), firstPetName) {
-			return fmt.Errorf("%s does not show %q", a.ListPath, firstPetName)
+		if !seededPetName.Match(body) {
+			return fmt.Errorf("%s shows no seeded pet name (Pet 00001 to Pet 10000)", a.ListPath)
+		}
+		if retries > 0 {
+			return passWith(fmt.Sprintf("retried after HTTP 429 (%d times): the admin rate limits", retries))
 		}
 		return nil
 	}},

@@ -1,0 +1,7 @@
+uadmin.db
+/templates/
+/static/
+/media/
+/models/
+/api/
+/views/

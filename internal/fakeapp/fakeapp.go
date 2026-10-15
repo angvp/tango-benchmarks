@@ -49,10 +49,13 @@ const (
 	AdminListEmpty               Fault = "admin-list-empty"
 	ExtraPet                     Fault = "extra-pet"
 	NoAdmin                      Fault = "no-admin"
+	AdminSlowDown                Fault = "admin-slow-down"
+	AdminAlwaysSlowDown          Fault = "admin-always-slow-down"
 )
 
 type App struct {
 	mu     sync.Mutex
+	hits   int
 	faults []Fault
 	pets   []seed.Pet
 	orders []order
@@ -355,10 +358,28 @@ func (a *App) adminLogin(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/admin/petshop/pet/", http.StatusFound)
 }
 
+// tooFast answers 429 the way an admin with a per-IP rate limit does: on the
+// second signed-in request for AdminSlowDown (the first is the redirect after
+// login, so a retry of the explicit request succeeds), every time for
+// AdminAlwaysSlowDown.
+func (a *App) tooFast(w http.ResponseWriter) bool {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.hits++
+	if a.has(AdminAlwaysSlowDown) || (a.has(AdminSlowDown) && a.hits == 2) {
+		http.Error(w, "Slow down. You are going too fast!", http.StatusTooManyRequests)
+		return true
+	}
+	return false
+}
+
 func (a *App) adminList(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie("admin")
 	if (err != nil || c.Value != "ok") && !a.has(OpenAdmin) {
 		http.Redirect(w, r, "/admin/login/", http.StatusFound)
+		return
+	}
+	if a.tooFast(w) {
 		return
 	}
 	var b strings.Builder
