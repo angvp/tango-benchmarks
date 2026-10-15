@@ -1,0 +1,9 @@
+{
+  "name": "tango",
+  "admin": {
+    "login_path": "/admin/login/",
+    "list_path": "/admin/pet/",
+    "username_field": "username",
+    "password_field": "password"
+  }
+}

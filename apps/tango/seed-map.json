@@ -1,0 +1,8 @@
+{
+  "tables": [
+    {"csv": "categories.csv", "table": "category", "columns": {"id": "id", "name": "name"}},
+    {"csv": "customers.csv", "table": "customer", "columns": {"id": "id", "name": "name", "email": "email"}},
+    {"csv": "pets.csv", "table": "pet", "columns": {"id": "id", "name": "name", "price_cents": "price_cents", "status": "status", "category_id": "category_id"}}
+  ],
+  "truncate_also": ["order"]
+}
