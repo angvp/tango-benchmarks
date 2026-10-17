@@ -3,7 +3,7 @@ module petshop
 go 1.27.2
 
 require (
-	github.com/angvp/tango v0.4.0
+	github.com/angvp/tango v0.5.0
 	github.com/jackc/pgx/v5 v5.11.0
 	modernc.org/sqlite v1.60.1
 )

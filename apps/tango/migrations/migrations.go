@@ -29,4 +29,16 @@ var Migrations = []migration.Migration{
 			migration.DropTable{Table: "category"},
 		},
 	},
+	{App: "shop", Name: "0003_auto_20261017013431", Reversible: true,
+		Up: []migration.Step{
+			migration.CreateIndex{Table: "pet", Column: "category_id"},
+			migration.CreateIndex{Table: "order", Column: "pet_id"},
+			migration.CreateIndex{Table: "order", Column: "customer_id"},
+		},
+		Down: []migration.Step{
+			migration.DropIndex{Table: "order", Column: "customer_id"},
+			migration.DropIndex{Table: "order", Column: "pet_id"},
+			migration.DropIndex{Table: "pet", Column: "category_id"},
+		},
+	},
 }

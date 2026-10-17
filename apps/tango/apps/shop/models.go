@@ -10,7 +10,7 @@ type Pet struct {
 	Name       string `json:"name"`
 	PriceCents int64  `json:"price_cents"`
 	Status     string `json:"status" tango:"index"`
-	CategoryID int64  `tango:"fk=Category" json:"category_id"`
+	CategoryID int64  `tango:"fk=Category,index" json:"category_id"`
 }
 
 type Customer struct {
@@ -21,6 +21,6 @@ type Customer struct {
 
 type Order struct {
 	ID         int64 `tango:"pk" json:"id"`
-	PetID      int64 `tango:"fk=Pet" json:"pet_id"`
-	CustomerID int64 `tango:"fk=Customer" json:"customer_id"`
+	PetID      int64 `tango:"fk=Pet,index" json:"pet_id"`
+	CustomerID int64 `tango:"fk=Customer,index" json:"customer_id"`
 }
