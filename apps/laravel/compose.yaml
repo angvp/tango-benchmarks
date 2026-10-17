@@ -1,0 +1,19 @@
+services:
+  app:
+    build: ./apps/laravel
+    environment:
+      APP_KEY: base64:YmVuY2htYXJrLXRocm93YXdheS1rZXktMDEyMzQ1Njc=
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_DATABASE: bench
+      DB_USERNAME: bench
+      DB_PASSWORD: bench
+      LOG_CHANNEL: stderr
+    ports:
+      - "127.0.0.1:8080:8080"
+    cpus: 2
+    mem_limit: 2g
+    depends_on:
+      db:
+        condition: service_healthy

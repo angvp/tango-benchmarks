@@ -1,0 +1,9 @@
+{
+  "generated": [
+    "README.md", "AGENTS.md", "CLAUDE.md", ".*", "artisan", "package.json", "phpunit.xml", "vite.config.js",
+    "bootstrap/providers.php", "bootstrap/cache/**", "config/**", "public/**", "resources/**", "storage/**", "tests/**",
+    "app/Http/Controllers/Controller.php", "app/Providers/**", "database/factories/**", "database/seeders/**", "routes/console.php", "routes/web.php",
+    "database/migrations/0001_*", "database/migrations/2026_10_16_*", "app/Models/User.php"
+  ],
+  "scaffold_edited": ["bootstrap/app.php"]
+}

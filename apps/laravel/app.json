@@ -1,0 +1,5 @@
+{
+  "name": "laravel",
+  "admin": null,
+  "admin_na_reason": "Laravel ships no administration interface; Filament, Nova and similar are separate packages, outside this framework-only comparison"
+}

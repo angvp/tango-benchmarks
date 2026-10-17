@@ -1,0 +1,8 @@
+# From an empty directory to a running pet shop with its staff account.
+composer create-project laravel/laravel . "^13.0"
+php artisan install:api
+php artisan make:migration create_shop_tables
+DB_CONNECTION=pgsql DB_HOST=localhost DB_DATABASE=bench DB_USERNAME=bench DB_PASSWORD=bench php artisan migrate --force
+DB_CONNECTION=pgsql DB_HOST=localhost DB_DATABASE=bench DB_USERNAME=bench DB_PASSWORD=bench php artisan tinker --execute='User::create(["name" => "bench-staff", "email" => "bench-staff@example.test", "password" => "bench-staff-password"]);'
+APP_ENV=production APP_DEBUG=false DB_CONNECTION=pgsql DB_HOST=localhost DB_DATABASE=bench DB_USERNAME=bench DB_PASSWORD=bench php artisan optimize
+DB_CONNECTION=pgsql DB_HOST=localhost DB_DATABASE=bench DB_USERNAME=bench DB_PASSWORD=bench php-fpm
