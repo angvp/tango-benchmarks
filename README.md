@@ -8,7 +8,7 @@ Three tracks are kept apart and never blended:
 - **Effort:** the steps, files, lines and tokens it takes to build the pet shop, and what each framework generates for you.
 - **Capability:** what each framework gives you out of the box, with a link to its own documentation for every claim.
 
-Result numbers are not published here until they have been reviewed and the maintainers of the compared projects have been invited to correct their apps. Only released versions of each framework are measured.
+Results are published in [`docs/results.md`](docs/results.md), labelled as what they are: one laptop, not a controlled run. The apps have not yet been reviewed by the maintainers of the compared projects, who are welcome to correct them. Only released versions of each framework are measured.
 
 ## The pet shop
 
@@ -32,7 +32,7 @@ Every app runs in a container with the same CPU and memory limits, against Postg
 - **Performance** ([`docs/load.md`](docs/load.md)): five scenarios, parameters in [`load/params.json`](load/params.json), at least five runs each, reported as medians with the run-to-run range, plus peak memory and cold start. Only successful responses count in latency; failures are counted by status.
 - **Effort** ([`docs/effort.md`](docs/effort.md)): steps, files, lines and tokens (`cl100k_base`), generated code shown separately, plus dependencies and image size. "Authored" is not a score.
 - **Capability** ([`docs/capabilities.md`](docs/capabilities.md)): a fixed list of 22 capabilities, answered yes, partial or no from each framework's own documentation, each with a link or "not documented". No cell is derived from the numbers.
-- **Not a leaderboard.** The tracks are never combined, and a framework that lacks a feature gets N/A with a reason, not zero. Runs on a laptop are stamped `local, not publishable`. A publishable run is made on dedicated cloud machines and declared as such.
+- **Not a leaderboard.** The tracks are never combined, and a framework that lacks a feature gets N/A with a reason, not zero. Runs on a laptop are stamped `local, not publishable` in the result files, and the numbers published here say plainly that they come from one laptop. A run on dedicated cloud machines is still to be made.
 - **Corrections welcome.** If you maintain a compared project and think its app is not idiomatic, open an issue or a pull request; the runs are redone after a correction.
 
 Pinned versions: tanGO v0.4.0 (v0.5.0 is released; the app has not been moved to it yet), Django 6.1.2 with gunicorn 26.2.0 and psycopg 3.3.6 on Python 3.13, uAdmin v0.10.2, Go with chi, pgx and sqlc 1.28.0 (run through its Docker image), Fuego v0.18.0, togo kernel v0.21.1 with its CLI v0.2.37, Rails 8.1.4 on Ruby 3.4 with Puma, Laravel 13.37 on PHP 8.4 (nginx and PHP-FPM from the `serversideup/php` image), PostgreSQL 17, tokenizer `cl100k_base` via tiktoken-go v0.1.7. Each app's `CONFIGURATION.md` says what was set and why.
@@ -66,6 +66,6 @@ An app directory is self-contained: adding a framework means adding `apps/<name>
 
 ## Status
 
-The eight apps (tanGO, Django, uAdmin, a plain Go baseline, Fuego, togo, Rails and Laravel) pass the conformance suite. Their capability answers exist for the first four; Fuego, togo, Rails and Laravel are still to be answered from their own documentation. Result numbers are not published yet (see above).
+The eight apps (tanGO, Django, uAdmin, a plain Go baseline, Fuego, togo, Rails and Laravel) pass the conformance suite. Their capability answers exist for the first four; Fuego, togo, Rails and Laravel are still to be answered from their own documentation. Results are in [`docs/results.md`](docs/results.md).
 
 Licensed under the MIT license.

@@ -36,7 +36,7 @@ The summary shows, per scenario, the median over runs of req/s, p50, p95 and p99
 
 Every app and PostgreSQL 17 run with the same container limits (2 CPUs, 2 GiB) from the same `compose.yaml`. Each app uses its framework's documented production server with workers equal to the CPU limit, one recorded configuration, no tuning sweeps.
 
-The load generator runs on the same machine as the containers. That is acceptable for checking the harness and for finding gaps, and it is **not publishable**: every result file carries the stamp `local, not publishable`. A publishable run is made on dedicated cloud machines and is declared as such.
+The load generator runs on the same machine as the containers. That is acceptable for checking the harness and for finding gaps, and the numbers it gives are from one machine, not a controlled run: every result file carries the stamp `local, not publishable`, and [results.md](results.md) says so beside every table. A run on dedicated cloud machines is declared as such.
 
 ## Running it
 

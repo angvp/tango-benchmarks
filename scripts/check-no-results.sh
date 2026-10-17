@@ -1,7 +1,7 @@
 #!/bin/sh
-# Fails when result numbers are tracked by git. Results stay local until they
-# have been reviewed and the compared projects' maintainers have been invited
-# to correct their apps; see README.md.
+# Fails when raw result files are tracked by git. The numbers worth sharing are
+# copied by hand into docs/results.md, with their one-laptop label; the files
+# the load generator writes stay local.
 #
 #   scripts/check-no-results.sh       checks the repository in the current directory
 set -eu
