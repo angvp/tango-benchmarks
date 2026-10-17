@@ -1,0 +1,5 @@
+{
+  "name": "rails",
+  "admin": null,
+  "admin_na_reason": "Rails ships no administration interface; Active Admin, Avo and similar are third-party gems, outside this framework-only comparison"
+}

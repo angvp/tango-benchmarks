@@ -1,0 +1,16 @@
+services:
+  app:
+    build: ./apps/rails
+    environment:
+      RAILS_ENV: production
+      DATABASE_URL: postgres://bench:bench@db:5432/bench
+      SECRET_KEY_BASE: benchmark-throwaway-secret-key-base-0123456789abcdef0123456789abcdef0123456789abcdef
+      WEB_CONCURRENCY: "2"
+      PORT: "8080"
+    ports:
+      - "127.0.0.1:8080:8080"
+    cpus: 2
+    mem_limit: 2g
+    depends_on:
+      db:
+        condition: service_healthy

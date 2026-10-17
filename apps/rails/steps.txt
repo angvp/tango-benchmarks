@@ -1,0 +1,8 @@
+# From an empty directory to a running pet shop with its staff account.
+gem install rails -v 8.1.4
+rails new . --api --database=postgresql --skip-solid --skip-docker --skip-kamal --skip-thruster
+bundle add bcrypt
+bin/rails generate migration CreateShop
+DATABASE_URL=postgres://bench:bench@localhost:5432/bench RAILS_ENV=production SECRET_KEY_BASE=benchmark-throwaway-secret-key-base bin/rails db:prepare
+DATABASE_URL=postgres://bench:bench@localhost:5432/bench RAILS_ENV=production SECRET_KEY_BASE=benchmark-throwaway-secret-key-base bin/rails runner 'StaffMember.create!(username: "bench-staff", password: "bench-staff-password")'
+DATABASE_URL=postgres://bench:bench@localhost:5432/bench RAILS_ENV=production SECRET_KEY_BASE=benchmark-throwaway-secret-key-base PORT=8080 WEB_CONCURRENCY=2 bundle exec puma -C config/puma.rb

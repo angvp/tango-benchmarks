@@ -1,0 +1,9 @@
+{
+  "generated": [
+    "README.md", "Rakefile", "config.ru", "bin/**", "script/**", "public/**", "app/jobs/**", "app/models/application_record.rb",
+    "config/application.rb", "config/boot.rb", "config/cable.yml", "config/credentials.yml.enc", "config/environment.rb",
+    "config/environments/**", "config/initializers/**", "config/locales/**", "config/storage.yml", "config/puma.rb",
+    "config/database.yml", "db/seeds.rb", "lib/**", "storage/**", "vendor/**", "log/**", "tmp/**", ".*", "app/controllers/concerns/**", "app/models/concerns/**"
+  ],
+  "scaffold_edited": ["config/environments/production.rb"]
+}
