@@ -1,0 +1,10 @@
+{
+  "generated": [
+    ".claude/**", ".env.example", ".mcp.json", "CLAUDE.md", "Makefile", "README.md", "atlas.hcl", "db/**",
+    "docker-compose.yml", "gqlgen.yml", "lang/**", "sqlc.yaml", "togo.yaml", "tools.go", "web/**",
+    "cmd/migrate/**", "cmd/seed/**", "internal/app/**", "internal/db/gen/**", "internal/db/queries/**",
+    "internal/db/schema/0000_schema.sql", "internal/db/seeders/**", "internal/graph/**", "internal/plugins/**", "internal/resources/**",
+    "internal/rest/registry.gen.go"
+  ],
+  "scaffold_edited": ["cmd/api/main.go", "internal/server/server.go"]
+}

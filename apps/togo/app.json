@@ -1,0 +1,5 @@
+{
+  "name": "togo",
+  "admin": null,
+  "admin_na_reason": "togo's admin is a React page over its auth plugin's user-administration API; it has no generated administration of the application's own models"
+}

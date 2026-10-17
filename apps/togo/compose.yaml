@@ -1,0 +1,17 @@
+services:
+  app:
+    build: ./apps/togo
+    environment:
+      APP_ENV: production
+      AUTH_SECRET: benchmark-throwaway-secret-not-for-real-use-0123456789
+      DB_DRIVER: pgx
+      DATABASE_URL: postgres://bench:bench@db:5432/bench?sslmode=disable
+      ADDR: ":8080"
+      DB_MAX_IDLE: "${DB_MAX_IDLE:-}"
+    ports:
+      - "127.0.0.1:8080:8080"
+    cpus: 2
+    mem_limit: 2g
+    depends_on:
+      db:
+        condition: service_healthy

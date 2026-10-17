@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en" data-brand="togo">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shop — built with ToGO</title>
+    <!-- No-flash theme: same logic as nasaqThemeScript("dark") from @fadymondy/nasaq/web. -->
+    <script>
+      (function(){try{var p=localStorage.getItem("nasaq-theme")||"dark";var d=p==="dark"||(p==="system"&&matchMedia("(prefers-color-scheme: dark)").matches);var e=document.documentElement;e.dataset.theme=d?"dark":"light";e.classList.toggle("dark",d);e.style.colorScheme=d?"dark":"light"}catch(_){}})();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

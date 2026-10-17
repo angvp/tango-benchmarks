@@ -1,0 +1,6 @@
+# From an empty directory to a running pet shop with its staff account.
+go install github.com/togo-framework/cli/cmd/togo@v0.2.37
+togo new shop --db postgres --dir . --module petshop
+# Hand-written: the schema file, the login, pets and orders handlers (internal/rest), and two lines in cmd/api and internal/server.
+togo migrate
+DATABASE_URL=postgres://bench:bench@localhost:5432/bench?sslmode=disable DB_DRIVER=pgx APP_ENV=production AUTH_SECRET=benchmark-throwaway-secret-not-for-real-use-0123456789 go run ./cmd/api

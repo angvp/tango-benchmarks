@@ -1,0 +1,23 @@
+name: shop
+module: github.com/angvp/tango-benchmarks/apps/togo
+
+database:
+  driver: pgx
+  url: ${DATABASE_URL}
+
+api:
+  graphql: /graphql
+  rest: /api
+  docs: /docs
+
+auth:
+  provider: supabase
+
+frontend:
+  dir: web
+
+plugins:
+    - github.com/togo-framework/auth
+    - github.com/togo-framework/settings
+    - github.com/togo-framework/data
+    - github.com/togo-framework/auth-dev

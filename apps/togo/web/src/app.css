@@ -1,0 +1,12 @@
+@import "tailwindcss";
+@import "@fadymondy/nasaq/tokens.css";
+@import "@fadymondy/nasaq/theme.css";
+@import "@fadymondy/nasaq/web/styles.css";
+/* Tailwind does not scan node_modules: point it at the Nasaq components so their classes are generated. */
+@source "../node_modules/@fadymondy/nasaq/dist/web";
+
+/* Lusail (Arabic) ships with the app in public/fonts; Nasaq's Arabic stack picks it up by name. */
+@font-face { font-family: "Lusail"; src: url("/fonts/lusail/Lusail-Light.woff2") format("woff2"); font-weight: 300; font-display: swap; }
+@font-face { font-family: "Lusail"; src: url("/fonts/lusail/Lusail-Regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Lusail"; src: url("/fonts/lusail/Lusail-Medium.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Lusail"; src: url("/fonts/lusail/Lusail-Bold.woff2") format("woff2"); font-weight: 700; font-display: swap; }
