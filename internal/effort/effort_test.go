@@ -53,6 +53,7 @@ func TestClassify(t *testing.T) {
 		{"docker-entrypoint.sh", "", false},
 		{"shop/__pycache__/views.cpython-313.pyc", "", false},
 		{"bin/petshop", "", false},
+		{"vendor/laravel/framework/src/Foo.php", "", false},
 	}
 	for _, tc := range cases {
 		got, in := Classify(tc.path, rules)
@@ -201,5 +202,44 @@ func TestReportIsStampedAndStable(t *testing.T) {
 	}
 	if strings.Contains(string(raw), "image_bytes") {
 		t.Errorf("an unmeasured image size must be omitted, got %s", raw)
+	}
+}
+
+func TestDirectDependenciesRuby(t *testing.T) {
+	dir := t.TempDir()
+	write(t, dir, "Gemfile", `source "https://rubygems.org"
+# gem "commented", "~> 1.0"
+gem "rails", "~> 8.1.4"
+gem "pg", "~> 1.1"
+gem "tzinfo-data", platforms: %i[ windows jruby ]
+
+group :development, :test do
+  gem "debug"
+end
+gem "puma"
+`)
+	got, err := CountDependencies(dir)
+	if err != nil || got != 3 {
+		t.Fatalf("got %d, %v; want 3 (rails, pg, puma: no comment, platform gem or development group)", got, err)
+	}
+}
+
+func TestDirectDependenciesPHP(t *testing.T) {
+	dir := t.TempDir()
+	write(t, dir, "composer.json", `{
+  "require": {"php": "^8.3", "ext-pdo": "*", "laravel/framework": "^13.0", "laravel/sanctum": "^4.0"},
+  "require-dev": {"phpunit/phpunit": "^12.0"}
+}`)
+	got, err := CountDependencies(dir)
+	if err != nil || got != 2 {
+		t.Fatalf("got %d, %v; want 2 (the framework and sanctum: not php, extensions or require-dev)", got, err)
+	}
+}
+
+func TestPackageManagerFilesAreInfrastructure(t *testing.T) {
+	for _, name := range []string{"Gemfile", "Gemfile.lock", "composer.json", "composer.lock"} {
+		if _, in := Classify(name, Rules{}); in {
+			t.Errorf("%s must not count as authored code", name)
+		}
 	}
 }

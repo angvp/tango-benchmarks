@@ -60,10 +60,10 @@ func ParseRules(raw []byte) (Rules, error) {
 var infrastructure = []string{
 	"Dockerfile", "docker-entrypoint.sh", "compose.yaml", "app.json", "seed-map.json",
 	"effort.json", "steps.txt", "CONFIGURATION.md", ".gitignore",
-	"go.mod", "go.sum", "requirements.txt",
+	"go.mod", "go.sum", "requirements.txt", "Gemfile", "Gemfile.lock", "composer.json", "composer.lock",
 }
 
-var noiseDirs = []string{"__pycache__", "bin", "node_modules", ".git"}
+var noiseDirs = []string{"__pycache__", "bin", "node_modules", ".git", "vendor"}
 
 // Classify says which column a file belongs in, and whether it counts at all.
 // rel is the path relative to the app, with forward slashes.
@@ -180,7 +180,8 @@ func Measure(dir string, rules Rules, tok Tokenizer) (Report, error) {
 }
 
 // CountDependencies counts the direct dependencies an app declares, from its
-// go.mod or requirements.txt. An app with neither is an error.
+// go.mod, requirements.txt, Gemfile or composer.json. An app with none of them
+// is an error.
 func CountDependencies(dir string) (int, error) {
 	if raw, err := os.ReadFile(filepath.Join(dir, "go.mod")); err == nil {
 		return countGoDependencies(string(raw)), nil
@@ -188,7 +189,13 @@ func CountDependencies(dir string) (int, error) {
 	if raw, err := os.ReadFile(filepath.Join(dir, "requirements.txt")); err == nil {
 		return countPythonDependencies(string(raw)), nil
 	}
-	return 0, fmt.Errorf("%s has neither go.mod nor requirements.txt: add a rule for its ecosystem", dir)
+	if raw, err := os.ReadFile(filepath.Join(dir, "Gemfile")); err == nil {
+		return countRubyDependencies(string(raw)), nil
+	}
+	if raw, err := os.ReadFile(filepath.Join(dir, "composer.json")); err == nil {
+		return countPHPDependencies(raw)
+	}
+	return 0, fmt.Errorf("%s has no go.mod, requirements.txt, Gemfile or composer.json: add a rule for its ecosystem", dir)
 }
 
 func countGoDependencies(gomod string) int {
@@ -207,6 +214,45 @@ func countGoDependencies(gomod string) int {
 		}
 	}
 	return n
+}
+
+// countRubyDependencies counts the gems a Gemfile requires for production:
+// not comments, not gems limited to other platforms, not the development and
+// test groups.
+func countRubyDependencies(gemfile string) int {
+	n, skipDepth := 0, 0
+	for _, line := range strings.Split(gemfile, "\n") {
+		line = strings.TrimSpace(line)
+		switch {
+		case skipDepth > 0 && line == "end":
+			skipDepth--
+		case skipDepth > 0 && strings.HasSuffix(line, " do"):
+			skipDepth++
+		case strings.HasPrefix(line, "group ") && (strings.Contains(line, ":development") || strings.Contains(line, ":test")):
+			skipDepth = 1
+		case skipDepth == 0 && strings.HasPrefix(line, "gem ") && !strings.Contains(line, "platforms:"):
+			n++
+		}
+	}
+	return n
+}
+
+// countPHPDependencies counts composer.json's require entries other than php
+// and its extensions; require-dev is not counted.
+func countPHPDependencies(raw []byte) (int, error) {
+	var manifest struct {
+		Require map[string]string `json:"require"`
+	}
+	if err := json.Unmarshal(raw, &manifest); err != nil {
+		return 0, fmt.Errorf("composer.json: %w", err)
+	}
+	n := 0
+	for name := range manifest.Require {
+		if name != "php" && !strings.HasPrefix(name, "ext-") {
+			n++
+		}
+	}
+	return n, nil
 }
 
 func countPythonDependencies(requirements string) int {
