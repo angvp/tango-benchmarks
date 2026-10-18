@@ -35,7 +35,7 @@ Every app runs in a container with the same CPU and memory limits, against Postg
 - **Not a leaderboard.** The tracks are never combined, and a framework that lacks a feature gets N/A with a reason, not zero. Runs on a laptop are stamped `local, not publishable` in the result files, and the numbers published here say plainly that they come from one laptop. A run on dedicated cloud machines is still to be made.
 - **Corrections welcome.** If you maintain a compared project and think its app is not idiomatic, open an issue or a pull request; the runs are redone after a correction.
 
-Pinned versions: tanGO v0.4.0 (v0.5.0 is released; the app has not been moved to it yet), Django 6.1.2 with gunicorn 26.2.0 and psycopg 3.3.6 on Python 3.13, uAdmin v0.10.2, Go with chi, pgx and sqlc 1.28.0 (run through its Docker image), Fuego v0.18.0, togo kernel v0.21.1 with its CLI v0.2.37, Rails 8.1.4 on Ruby 3.4 with Puma, Laravel 13.37 on PHP 8.4 (nginx and PHP-FPM from the `serversideup/php` image), PostgreSQL 17, tokenizer `cl100k_base` via tiktoken-go v0.1.7. Each app's `CONFIGURATION.md` says what was set and why.
+Pinned versions: tanGO v0.5.0, Django 6.1.2 with gunicorn 26.2.0 and psycopg 3.3.6 on Python 3.13, uAdmin v0.10.2, Go with chi, pgx and sqlc 1.28.0 (run through its Docker image), Fuego v0.18.0, togo kernel v0.21.1 with its CLI v0.2.37, Rails 8.1.4 on Ruby 3.4 with Puma, Laravel 13.37 on PHP 8.4 (nginx and PHP-FPM from the `serversideup/php` image), PostgreSQL 17, tokenizer `cl100k_base` via tiktoken-go v0.1.7. Each app's `CONFIGURATION.md` says what was set and why.
 
 ## Reproducing a run
 
@@ -66,6 +66,6 @@ An app directory is self-contained: adding a framework means adding `apps/<name>
 
 ## Status
 
-The eight apps (tanGO, Django, uAdmin, a plain Go baseline, Fuego, togo, Rails and Laravel) pass the conformance suite. Their capability answers exist for the first four; Fuego, togo, Rails and Laravel are still to be answered from their own documentation. Results are in [`docs/results.md`](docs/results.md).
+The eight apps (tanGO, Django, uAdmin, a plain Go baseline, Fuego, togo, Rails and Laravel) pass the conformance suite. Each has its 22 capability answers in [`docs/capabilities.md`](docs/capabilities.md), taken from the framework's own documentation. Results are in [`docs/results.md`](docs/results.md).
 
 Licensed under the MIT license.

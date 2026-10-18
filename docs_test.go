@@ -20,8 +20,8 @@ func TestCapabilityMatrixIsComplete(t *testing.T) {
 		t.Fatal(err)
 	}
 	sections := strings.Split(string(matrix), "\n## ")[1:]
-	if len(sections) != 4 {
-		t.Fatalf("got %d frameworks, want 4", len(sections))
+	if len(sections) != 8 {
+		t.Fatalf("got %d frameworks, want 8", len(sections))
 	}
 	row := regexp.MustCompile(`^\| (\d+) \| (.+?) \| (yes|partial|no) \| (.+?) \| (not documented|\[link\]\(https://[^)]+\)) \|$`)
 	for _, s := range sections {
