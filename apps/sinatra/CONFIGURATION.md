@@ -7,7 +7,7 @@ Built on **Sinatra 4.2.1** with Ruby 3.4 and Puma, using a modular `Sinatra::Bas
 | Framework | `sinatra 4.2.1`, `rackup 2.3.1` |
 | Ruby | 3.4 (`ruby:3.4-slim`) |
 | Database layer | `sequel 5.109.0` with `pg 1.7.0`, a pool of 3 connections per worker (the thread count); tables are created at start by a setup script that runs once before the workers start |
-| Server | `puma 8.0.2`, 2 worker processes (the CPU limit) of 3 threads each, as for the Rails app |
+| Server | `puma 8.0.2`, 2 worker processes (the CPU limit) of 3 threads each, as for the Rails app, set in `puma.rb`. Puma preloads the app, so `before_fork` drops Sequel's connection; without it the workers share one PostgreSQL connection and answer wrongly under load |
 | Environment | `RACK_ENV=production` and `set :environment, :production` |
 | Validation | the contract's 400s and 422s are written by hand; Sinatra reads `params` and has no validation layer |
 | API | `get`, `post` and `put` routes; JSON is written with the standard library (the `json` helper is in sinatra-contrib, which is not used) |

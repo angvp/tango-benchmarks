@@ -2,4 +2,4 @@
 bundle init
 bundle add sinatra rackup puma sequel pg bcrypt
 DATABASE_URL=postgres://bench:bench@localhost:5432/bench bundle exec ruby setup.rb
-DATABASE_URL=postgres://bench:bench@localhost:5432/bench TOKEN_SECRET=bench bundle exec puma config.ru
+DATABASE_URL=postgres://bench:bench@localhost:5432/bench TOKEN_SECRET=bench bundle exec puma -C puma.rb config.ru

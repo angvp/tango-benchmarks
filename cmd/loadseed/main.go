@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 
@@ -29,11 +30,23 @@ func main() {
 		fmt.Fprintln(os.Stderr, "loadseed: -map and a DSN (-dsn or DATABASE_URL) are required")
 		os.Exit(2)
 	}
-	if err := run(context.Background(), *dsn, *mapPath, *dataDir); err != nil {
+	var err error
+	for attempt := 1; attempt <= deadlockAttempts; attempt++ {
+		if err = run(context.Background(), *dsn, *mapPath, *dataDir); !loadseed.IsDeadlock(err) {
+			break
+		}
+		fmt.Fprintf(os.Stderr, "loadseed: deadlock with the app (attempt %d of %d), trying again\n", attempt, deadlockAttempts)
+		time.Sleep(2 * time.Second)
+	}
+	if err != nil {
 		fmt.Fprintln(os.Stderr, "loadseed:", err)
 		os.Exit(1)
 	}
 }
+
+// deadlockAttempts is how often a reset is tried when PostgreSQL aborts it to
+// break a deadlock with a request the app is still finishing.
+const deadlockAttempts = 5
 
 func run(ctx context.Context, dsn, mapPath, dataDir string) (err error) {
 	raw, err := os.ReadFile(mapPath)
