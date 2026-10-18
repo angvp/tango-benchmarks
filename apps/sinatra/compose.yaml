@@ -1,0 +1,14 @@
+services:
+  app:
+    build: ./apps/sinatra
+    environment:
+      DATABASE_URL: postgres://bench:bench@db:5432/bench
+      WEB_CONCURRENCY: "2"
+      RACK_ENV: production
+    ports:
+      - "127.0.0.1:8080:8080"
+    cpus: 2
+    mem_limit: 2g
+    depends_on:
+      db:
+        condition: service_healthy

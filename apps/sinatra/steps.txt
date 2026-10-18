@@ -1,0 +1,5 @@
+# From an empty directory to a running pet shop with its staff account.
+bundle init
+bundle add sinatra rackup puma sequel pg bcrypt
+DATABASE_URL=postgres://bench:bench@localhost:5432/bench bundle exec ruby setup.rb
+DATABASE_URL=postgres://bench:bench@localhost:5432/bench TOKEN_SECRET=bench bundle exec puma config.ru

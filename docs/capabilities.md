@@ -6,7 +6,7 @@ What each framework itself provides for the pet shop, answered from its own docu
 - **partial**: it provides part of it; the note says which part.
 - **no**: not provided by the framework. The source is `not documented` when there is nothing to link.
 
-Versions: tanGO v0.5.0, Django 6.1, uAdmin v0.10.2, Fuego v0.18.0, togo kernel v0.21.1 (with the plugin versions its pet shop installs), Rails 8.1 and Laravel 13. The plain Go baseline is the standard library, chi, pgx and sqlc, so its answers are about those libraries. "Source only" means the behaviour is in the code at that tag and not in the project's documentation. A capability that a framework's own organisation ships as an installable plugin counts as provided by that framework, and the note says it is a plugin; this matters for togo, whose kernel is small and whose features are plugins. A third-party package does not count.
+Versions: tanGO v0.5.0, Django 6.1, uAdmin v0.10.2, Fuego v0.18.0, togo kernel v0.21.1 (with the plugin versions its pet shop installs), Rails 8.1, Laravel 13, Gin v1.12.0, FastAPI 0.143 with SQLModel 0.0.48, and Sinatra 4.2.1. The plain Go baseline is the standard library, chi, pgx and sqlc, so its answers are about those libraries. "Source only" means the behaviour is in the code at that tag and not in the project's documentation. A capability that a framework's own organisation ships as an installable plugin counts as provided by that framework, and the note says it is a plugin; this matters for togo, whose kernel is small and whose features are plugins. A third-party package does not count; `gin-contrib` is a separate organisation from Gin, so it does not count for Gin, and SQLModel is published under the `fastapi` organisation, so it counts for FastAPI.
 
 ## tanGO
 
@@ -223,3 +223,84 @@ Versions: tanGO v0.5.0, Django 6.1, uAdmin v0.10.2, Fuego v0.18.0, togo kernel v
 | 20 | OpenAPI document generation | no | No OpenAPI generation. | not documented |
 | 21 | Test tooling for the framework's own handlers | yes | PHPUnit and Pest testing, HTTP tests. | [link](https://laravel.com/docs/13.x/testing) |
 | 22 | Project scaffolding command | yes | The `laravel new` installer and `artisan make:` commands. | [link](https://laravel.com/docs/13.x/installation) |
+
+## Gin
+
+| # | Capability | Answer | Note | Source |
+|---|---|---|---|---|
+| 1 | Models with many-to-one relations | no | Gin has no data layer; the pet shop uses sqlc. | [link](https://gin-gonic.com/en/docs/server-config/database/) |
+| 2 | Migrations generated from models | no | No migrations. | not documented |
+| 3 | Admin interface generated from models | no | No admin. | not documented |
+| 4 | Per-model admin permissions | no | No admin. | not documented |
+| 5 | User accounts with hashed passwords | no | No accounts or password hashing. | not documented |
+| 6 | Session (cookie) login | no | The sessions page uses `gin-contrib/sessions`, a separate organisation. | [link](https://gin-gonic.com/en/docs/middleware/session-management/) |
+| 7 | Token (bearer) authentication for APIs | no | Only HTTP Basic authentication; JWT middleware is in `gin-contrib`. | [link](https://gin-gonic.com/en/docs/middleware/using-basicauth-middleware/) |
+| 8 | JSON API generated from models | no | Routes are hand-written. | not documented |
+| 9 | Request validation | yes | Binding with `binding` struct tags, checked by go-playground/validator. | [link](https://gin-gonic.com/en/docs/binding/binding-and-validation/) |
+| 10 | CSRF protection | no | No CSRF protection. | not documented |
+| 11 | HTML templating | yes | `html/template` rendering. | [link](https://gin-gonic.com/en/docs/rendering/html-rendering/) |
+| 12 | Pagination helper | no | Write the query. | not documented |
+| 13 | Query filtering helper | partial | `ShouldBindQuery` reads query parameters into a struct; nothing applies them to data. | [link](https://gin-gonic.com/en/docs/binding/only-bind-query-string/) |
+| 14 | Caching layer | no | No caching layer. | not documented |
+| 15 | Background jobs or scheduler | no | No jobs or scheduler. | not documented |
+| 16 | Internationalisation | no | No internationalisation. | not documented |
+| 17 | Rate limiting | no | Rate limiting is in `gin-contrib`, a separate organisation. | not documented |
+| 18 | Email sending | no | No email sending. | not documented |
+| 19 | WebSockets | no | "Gin does not include a built-in WebSocket implementation"; the page uses gorilla/websocket. | [link](https://gin-gonic.com/en/docs/server-config/websocket/) |
+| 20 | OpenAPI document generation | no | No OpenAPI generation. | not documented |
+| 21 | Test tooling for the framework's own handlers | yes | `httptest` with the router. | [link](https://gin-gonic.com/en/docs/testing/) |
+| 22 | Project scaffolding command | no | No scaffolding command. | not documented |
+
+## FastAPI
+
+| # | Capability | Answer | Note | Source |
+|---|---|---|---|---|
+| 1 | Models with many-to-one relations | yes | SQLModel (published under the `fastapi` organisation) with relationship attributes. | [link](https://fastapi.tiangolo.com/tutorial/sql-databases/) |
+| 2 | Migrations generated from models | no | `create_all` creates missing tables; migrations are a separate tool. | [link](https://fastapi.tiangolo.com/tutorial/sql-databases/) |
+| 3 | Admin interface generated from models | no | No admin. | not documented |
+| 4 | Per-model admin permissions | no | No admin. | not documented |
+| 5 | User accounts with hashed passwords | partial | The security tutorial shows password hashing with pwdlib; accounts are yours to write. | [link](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/) |
+| 6 | Session (cookie) login | partial | Starlette session cookies are available; the login is yours to write. | [link](https://fastapi.tiangolo.com/features/) |
+| 7 | Token (bearer) authentication for APIs | yes | OAuth2 password flow with bearer JWT tokens. | [link](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/) |
+| 8 | JSON API generated from models | no | Routes are hand-written; the OpenAPI document is generated from their types. | not documented |
+| 9 | Request validation | yes | Pydantic validation of parameters and bodies. Failures answer 422. | [link](https://fastapi.tiangolo.com/features/) |
+| 10 | CSRF protection | no | No CSRF protection. | not documented |
+| 11 | HTML templating | yes | `Jinja2Templates`. | [link](https://fastapi.tiangolo.com/advanced/templates/) |
+| 12 | Pagination helper | partial | The SQL tutorial shows `offset` and `limit` query parameters; there is no paginator. | [link](https://fastapi.tiangolo.com/tutorial/sql-databases/) |
+| 13 | Query filtering helper | partial | Query parameter models read query strings into a model; nothing applies them to data. | [link](https://fastapi.tiangolo.com/tutorial/query-param-models/) |
+| 14 | Caching layer | no | No caching layer. | not documented |
+| 15 | Background jobs or scheduler | partial | `BackgroundTasks` run in the process after the response; no queue, schedule or retries. | [link](https://fastapi.tiangolo.com/tutorial/background-tasks/) |
+| 16 | Internationalisation | no | No internationalisation. | not documented |
+| 17 | Rate limiting | no | No rate limiting. | not documented |
+| 18 | Email sending | no | No email sending. | not documented |
+| 19 | WebSockets | yes | WebSocket endpoints. | [link](https://fastapi.tiangolo.com/advanced/websockets/) |
+| 20 | OpenAPI document generation | yes | OpenAPI document and interactive docs generated from the code. | [link](https://fastapi.tiangolo.com/features/) |
+| 21 | Test tooling for the framework's own handlers | yes | `TestClient`. | [link](https://fastapi.tiangolo.com/tutorial/testing/) |
+| 22 | Project scaffolding command | partial | The Full Stack FastAPI Template is a project to copy; the `fastapi` command runs apps and does not scaffold. | [link](https://fastapi.tiangolo.com/project-generation/) |
+
+## Sinatra
+
+| # | Capability | Answer | Note | Source |
+|---|---|---|---|---|
+| 1 | Models with many-to-one relations | no | Sinatra has no data layer; the pet shop uses Sequel. | not documented |
+| 2 | Migrations generated from models | no | No migrations. | not documented |
+| 3 | Admin interface generated from models | no | No admin. | not documented |
+| 4 | Per-model admin permissions | no | No admin. | not documented |
+| 5 | User accounts with hashed passwords | no | No accounts or password hashing. | not documented |
+| 6 | Session (cookie) login | partial | Cookie sessions with `enable :sessions`; the login is yours to write. | [link](https://github.com/sinatra/sinatra/blob/v4.2.1/README.md#using-sessions) |
+| 7 | Token (bearer) authentication for APIs | no | Only an example of `Rack::Auth::Basic` middleware. | [link](https://github.com/sinatra/sinatra/blob/v4.2.1/README.md#rack-middleware) |
+| 8 | JSON API generated from models | no | Routes are hand-written. | not documented |
+| 9 | Request validation | no | Routes read the `params` hash; no validation is documented. | [link](https://github.com/sinatra/sinatra/blob/v4.2.1/README.md#routes) |
+| 10 | CSRF protection | partial | `rack-protection` is in Sinatra's repository and has an authenticity-token check, but it is not in the default set and the README does not describe it. | [link](https://github.com/sinatra/sinatra/blob/v4.2.1/rack-protection/README.md) |
+| 11 | HTML templating | yes | ERB and other template engines. | [link](https://github.com/sinatra/sinatra/blob/v4.2.1/README.md#views--templates) |
+| 12 | Pagination helper | no | Write the query. | not documented |
+| 13 | Query filtering helper | no | Write the query. | not documented |
+| 14 | Caching layer | partial | HTTP caching helpers (`cache_control`, `etag`, `expires`); no application cache. | [link](https://github.com/sinatra/sinatra/blob/v4.2.1/README.md#cache-control) |
+| 15 | Background jobs or scheduler | no | No jobs or scheduler. | not documented |
+| 16 | Internationalisation | no | No internationalisation. | not documented |
+| 17 | Rate limiting | no | No rate limiting. | not documented |
+| 18 | Email sending | no | No email sending. | not documented |
+| 19 | WebSockets | no | Streaming "can be used as the basis for WebSockets"; there is none. | [link](https://github.com/sinatra/sinatra/blob/v4.2.1/README.md#streaming-responses) |
+| 20 | OpenAPI document generation | no | No OpenAPI generation. | not documented |
+| 21 | Test tooling for the framework's own handlers | partial | The README recommends Rack::Test, a separate library. | [link](https://github.com/sinatra/sinatra/blob/v4.2.1/README.md#testing) |
+| 22 | Project scaffolding command | no | No scaffolding command. | not documented |

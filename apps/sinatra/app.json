@@ -1,0 +1,5 @@
+{
+  "name": "sinatra",
+  "admin": null,
+  "admin_na_reason": "Sinatra is a routing library with no administration interface"
+}

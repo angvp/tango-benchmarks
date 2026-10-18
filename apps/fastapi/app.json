@@ -1,0 +1,5 @@
+{
+  "name": "fastapi",
+  "admin": null,
+  "admin_na_reason": "FastAPI is an API framework with no administration interface"
+}
