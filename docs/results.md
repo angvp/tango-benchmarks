@@ -91,6 +91,8 @@ What it took to build the pet shop, from the same contract. Authored lines are w
 
 **`list` is the noisy scenario.** It is the slowest of the three shared ones for every Go app, because the contract has every page return a `total` of all matches, and the spread between runs is the widest here. Treat differences of 10 to 20% on `list` as noise.
 
+**Read p95 on `list` as a measure of concurrency, not of speed.** The Go apps have a typical `list` request of about 3.5 ms but a p95 of 60 to 70 ms, while Rails and Django, at a third of the throughput, show 21 and 27 ms. Every `list` request counts 10,000 rows on a PostgreSQL limited to 2 CPUs, and a Go app with a large connection pool runs many of those counts at once, so some requests wait far longer than others. Django and Rails run only a few queries at a time and queue the rest in order, which gives a narrower spread. We checked this on the plain Go baseline, `list` only, five runs each, on the same laptop: with its default pool the p95 was 62 and 61 ms; capped at 6 connections it was 51 ms; capped at 2 it was 9 ms, with throughput no lower (3,648 and 3,810 req/s by default, 4,079 at 2). The apps on this page use their frameworks' defaults, so the figures above are unchanged; a smaller pool is a tuning choice, and which is right depends on the database's CPU.
+
 ## Reproducing
 
 ```
